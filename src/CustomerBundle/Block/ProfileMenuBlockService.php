@@ -32,7 +32,7 @@ final class ProfileMenuBlockService extends MenuBlockService
      */
     public function __construct(Environment $templating, MenuProviderInterface $menuProvider, $menuBuilder)
     {
-        parent::__construct($templating, $menuProvider, []);
+        parent::__construct($templating, null, $menuProvider, []);
 
         if (!\is_object($menuBuilder) || !method_exists($menuBuilder, 'createProfileMenu')) {
             throw new \InvalidArgumentException(
