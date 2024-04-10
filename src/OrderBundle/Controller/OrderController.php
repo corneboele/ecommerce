@@ -17,11 +17,11 @@ use Sonata\Component\Customer\CustomerInterface;
 use Sonata\Component\Order\OrderElementInterface;
 use Sonata\Component\Order\OrderInterface;
 use Sonata\Component\Order\OrderManagerInterface;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 
-class OrderController extends Controller
+class OrderController extends AbstractController
 {
     /**
      * @throws AccessDeniedException

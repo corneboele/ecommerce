@@ -17,7 +17,7 @@ use Sonata\Component\Order\OrderInterface;
 use Sonata\Component\Payment\Debug\DebugPayment;
 use Sonata\Component\Payment\InvalidTransactionException;
 use Sonata\OrderBundle\Entity\OrderManager;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -27,7 +27,7 @@ use Symfony\Component\Routing\RouterInterface;
 /**
  * @author Sylvain Deloux <sylvain.deloux@ekino.com>
  */
-class DebugPaymentController extends Controller
+class DebugPaymentController extends AbstractController
 {
     /**
      * User choice action.

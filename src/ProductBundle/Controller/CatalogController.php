@@ -19,12 +19,12 @@ use Sonata\Component\Currency\CurrencyDetector;
 use Sonata\Component\Product\Pool;
 use Sonata\Component\Product\ProductProviderInterface;
 use Sonata\ProductBundle\Entity\ProductSetManager;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
-class CatalogController extends Controller
+class CatalogController extends AbstractController
 {
     /**
      * Index action for catalog.

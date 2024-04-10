@@ -13,10 +13,10 @@ declare(strict_types=1);
 
 namespace Sonata\ProductBundle\Controller;
 
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 
-class CategoryController extends Controller
+class CategoryController extends AbstractController
 {
     /**
      * @param null $category

@@ -19,7 +19,7 @@ use Sonata\Component\Customer\CustomerInterface;
 use Sonata\Component\Customer\CustomerManagerInterface;
 use Sonata\CustomerBundle\Entity\BaseAddress;
 use Sonata\CustomerBundle\Form\Type\AddressType;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -29,7 +29,7 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 /**
  * @author Hugo Briand <briand@ekino.com>
  */
-class CustomerController extends Controller
+class CustomerController extends AbstractController
 {
     /**
      * Lists customer's addresses.

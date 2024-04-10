@@ -18,13 +18,13 @@ use Sonata\Component\Basket\Basket;
 use Sonata\Component\Basket\BasketFactoryInterface;
 use Sonata\Component\Payment\InvalidTransactionException;
 use Sonata\Component\Payment\PaymentHandlerInterface;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\Exception\UnauthorizedHttpException;
 
-class PaymentController extends Controller
+class PaymentController extends AbstractController
 {
     /**
      * @var BasketFactoryInterface

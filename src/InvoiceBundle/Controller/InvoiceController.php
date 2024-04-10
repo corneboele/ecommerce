@@ -17,11 +17,11 @@ use Sonata\Component\Customer\CustomerInterface;
 use Sonata\Component\Invoice\InvoiceManagerInterface;
 use Sonata\Component\Order\OrderManagerInterface;
 use Sonata\Component\Transformer\InvoiceTransformer;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 
-class InvoiceController extends Controller
+class InvoiceController extends AbstractController
 {
     /**
      * @throws \RuntimeException

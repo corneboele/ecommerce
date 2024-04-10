@@ -17,12 +17,12 @@ use Sonata\ClassificationBundle\Model\CollectionManagerInterface;
 use Sonata\Component\Currency\CurrencyDetectorInterface;
 use Sonata\ProductBundle\Entity\ProductSetManager;
 use Sonata\SeoBundle\Seo\SeoPage;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
-class CollectionController extends Controller
+class CollectionController extends AbstractController
 {
     /**
      * @var SeoPage

@@ -20,7 +20,7 @@ use Sonata\BasketBundle\Form\ShippingType;
 use Sonata\Component\Basket\BasketFactoryInterface;
 use Sonata\Component\Customer\AddressInterface;
 use Sonata\Component\Delivery\UndeliverableCountryException;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\Extension\Core\Type\FormType;
 use Symfony\Component\Form\Extension\Validator\ViolationMapper\ViolationMapper;
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -34,7 +34,7 @@ use Symfony\Component\Routing\Exception\MethodNotAllowedException;
 /**
  * This controller manages the Basket operation and most of the order process.
  */
-class BasketController extends Controller
+class BasketController extends AbstractController
 {
     /**
      * @var BasketFactoryInterface
