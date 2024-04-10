@@ -1,4 +1,4 @@
-{% spaceless %}
+{% apply spaceless %}
 {% block sonata_address_render %}
     <div class="row">
         <div class="col-sm-{% if showEdit %}8{% else %}12{% endif %}">
@@ -20,4 +20,4 @@
         {% endblock %}
     </div>
 {% endblock %}
-{% endspaceless %}
+{% endapply %}

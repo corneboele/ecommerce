@@ -9,7 +9,7 @@ file that was distributed with this source code.
 
 #}
 
-{% spaceless %}
+{% apply spaceless %}
 
     {% set link = url('sonata_product_view', {'productId': product.id, 'slug': product.slug}) %}
 
@@ -41,4 +41,4 @@ file that was distributed with this source code.
         </div>
     </div>
 
-{% endspaceless %}
+{% endapply %}

@@ -22,8 +22,7 @@ file that was distributed with this source code.
 
         {% set looped = false %}
 
-        {% for order in orders
-            if order.status is constant('STATUS_PENDING', order) or order.status is constant('STATUS_OPEN', order) %}
+        {% for order in orders|filter(order => order.status is constant('STATUS_PENDING', order) or order.status is constant('STATUS_OPEN', order)) %}
 
             {% set looped = true %}
 
@@ -41,8 +40,7 @@ file that was distributed with this source code.
             </table>
         {% endif %}
 
-        {% for order in orders
-            if order.status is not constant('STATUS_PENDING', order) and order.status is not constant('STATUS_OPEN', order) %}
+        {% for order in orders|filter(order => )order.status is not constant('STATUS_PENDING', order) and order.status is not constant('STATUS_OPEN', order)) %}
 
             {% set looped = true %}
 

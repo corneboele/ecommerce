@@ -9,6 +9,6 @@ file that was distributed with this source code.
 
 #}
 
-{% spaceless %}
+{% apply spaceless %}
     {{ knp_pagination_render(pager, null, {}, {'pagination_class': 'pagination pull-right'}) }}
-{% endspaceless %}
+{% endapply %}

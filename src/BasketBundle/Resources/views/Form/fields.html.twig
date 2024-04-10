@@ -1,5 +1,5 @@
 {% block _sonata_basket_shipping_deliveryAddress_widget %}
-{% spaceless %}
+{% apply spaceless %}
     {% if expanded %}
         <div {{ block('widget_container_attributes') }}>
         {% for child in form %}
@@ -26,11 +26,11 @@
     {% if choices|length == 0 %}
         <p>{{ 'sonata.basket.message_no_delivery_addresses_available'|trans({}, 'SonataBasketBundle') }}</p>
     {% endif %}
-{% endspaceless %}
+{% endapply %}
 {% endblock _sonata_basket_shipping_deliveryAddress_widget %}
 
 {% block _sonata_basket_payment_billingAddress_widget %}
-{% spaceless %}
+{% apply spaceless %}
     {% if expanded %}
         <div {{ block('widget_container_attributes') }}>
         {% for child in form %}
@@ -57,5 +57,5 @@
     {% if choices|length == 0 %}
         <p>{{ 'sonata.basket.message_no_billing_addresses_available'|trans({}, 'SonataBasketBundle') }}</p>
     {% endif %}
-{% endspaceless %}
+{% endapply %}
 {% endblock _sonata_basket_payment_billingAddress_widget %}
