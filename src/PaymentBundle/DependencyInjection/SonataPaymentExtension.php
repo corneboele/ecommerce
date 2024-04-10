@@ -13,7 +13,8 @@ declare(strict_types=1);
 
 namespace Sonata\PaymentBundle\DependencyInjection;
 
-use Sonata\EasyExtendsBundle\Mapper\DoctrineCollector;
+use Sonata\Doctrine\Mapper\Builder\OptionsBuilder;
+use Sonata\Doctrine\Mapper\DoctrineCollector;
 use Symfony\Component\Config\Definition\Processor;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
@@ -181,21 +182,16 @@ class SonataPaymentExtension extends Extension
 
         $collector = DoctrineCollector::getInstance();
 
-        $collector->addAssociation($config['class']['transaction'], 'mapManyToOne', [
-            'fieldName' => 'order',
-            'targetEntity' => $config['class']['order'],
-            'cascade' => [],
-            'mappedBy' => null,
-            'inversedBy' => null,
-            'joinColumns' => [
-                [
+        $collector->addAssociation(
+            $config['class']['transaction'],
+            'mapManyToOne',
+            OptionsBuilder::createManyToOne('order', $config['class']['order'])
+                ->addJoin([
                     'name' => 'order_id',
                     'referencedColumnName' => 'id',
                     'onDelete' => 'SET NULL',
-                ],
-            ],
-            'orphanRemoval' => false,
-        ]);
+                ])
+        );
 
         $collector->addIndex($config['class']['transaction'], 'status_code', [
             'status_code',

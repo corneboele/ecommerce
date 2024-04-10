@@ -13,7 +13,8 @@ declare(strict_types=1);
 
 namespace Sonata\OrderBundle\DependencyInjection;
 
-use Sonata\EasyExtendsBundle\Mapper\DoctrineCollector;
+use Sonata\Doctrine\Mapper\Builder\OptionsBuilder;
+use Sonata\Doctrine\Mapper\DoctrineCollector;
 use Symfony\Component\Config\Definition\Processor;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
@@ -77,47 +78,37 @@ class SonataOrderExtension extends Extension
 
         $collector = DoctrineCollector::getInstance();
 
-        $collector->addAssociation($config['class']['order'], 'mapOneToMany', [
-            'fieldName' => 'orderElements',
-            'targetEntity' => $config['class']['order_element'],
-            'cascade' => [
-                 'persist',
-            ],
-            'mappedBy' => 'order',
-            'orphanRemoval' => false,
-        ]);
+        $collector->addAssociation(
+            $config['class']['order'],
+            'mapOneToMany',
+            OptionsBuilder::createOneToMany('orderElements', $config['class']['order_element'])
+                ->cascade(['persist'])
+                ->mappedBy('order')
+        );
 
-        $collector->addAssociation($config['class']['order'], 'mapManyToOne', [
-           'fieldName' => 'customer',
-           'targetEntity' => $config['class']['customer'],
-           'cascade' => [],
-           'mappedBy' => null,
-           'inversedBy' => 'orders',
-           'joinColumns' => [
-                [
+        $collector->addAssociation(
+            $config['class']['order'],
+            'mapManyToOne',
+            OptionsBuilder::createManyToOne('customer', $config['class']['customer'])
+                ->inversedBy('orders')
+                ->addJoin([
                     'name' => 'customer_id',
                     'referencedColumnName' => 'id',
                     'onDelete' => 'SET NULL',
-                ],
-           ],
-           'orphanRemoval' => false,
-        ]);
+                ])
+        );
 
-        $collector->addAssociation($config['class']['order_element'], 'mapManyToOne', [
-            'fieldName' => 'order',
-            'targetEntity' => $config['class']['order'],
-            'cascade' => [],
-            'mappedBy' => null,
-            'inversedBy' => 'orderElements',
-            'joinColumns' => [
-                [
+        $collector->addAssociation(
+            $config['class']['order_element'],
+            'mapManyToOne',
+            OptionsBuilder::createManyToOne('order', $config['class']['order'])
+                ->inversedBy('orderElements')
+                ->addJoin([
                     'name' => 'order_id',
                     'referencedColumnName' => 'id',
                     'onDelete' => 'CASCADE',
-                ],
-            ],
-            'orphanRemoval' => false,
-        ]);
+                ])
+        );
 
         $collector->addIndex($config['class']['order_element'], 'product_type', [
             'product_type',

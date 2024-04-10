@@ -13,7 +13,8 @@ declare(strict_types=1);
 
 namespace Sonata\BasketBundle\DependencyInjection;
 
-use Sonata\EasyExtendsBundle\Mapper\DoctrineCollector;
+use Sonata\Doctrine\Mapper\Builder\OptionsBuilder;
+use Sonata\Doctrine\Mapper\DoctrineCollector;
 use Symfony\Component\Config\Definition\Processor;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
@@ -82,47 +83,37 @@ class SonataBasketExtension extends Extension
 
         $collector = DoctrineCollector::getInstance();
 
-        $collector->addAssociation($config['class']['basket'], 'mapManyToOne', [
-             'fieldName' => 'customer',
-             'targetEntity' => $config['class']['customer'],
-             'cascade' => [],
-             'mappedBy' => null,
-             'inversedBy' => null,
-             'joinColumns' => [
-                 [
-                     'name' => 'customer_id',
-                     'referencedColumnName' => 'id',
-                     'onDelete' => 'CASCADE',
-                     'unique' => true,
-                 ],
-             ],
-             'orphanRemoval' => false,
-        ]);
+        $collector->addAssociation(
+            $config['class']['basket'],
+            'mapManyToOne',
+            OptionsBuilder::createManyToOne('customer', $config['class']['customer'])
+                ->addJoin([
+                    'name' => 'customer_id',
+                    'referencedColumnName' => 'id',
+                    'onDelete' => 'CASCADE',
+                    'unique' => true,
+                ])
+        );
 
-        $collector->addAssociation($config['class']['basket'], 'mapOneToMany', [
-             'fieldName' => 'basketElements',
-             'targetEntity' => $config['class']['basket_element'],
-             'cascade' => [
-                 'persist',
-             ],
-             'mappedBy' => 'basket',
-             'orphanRemoval' => true,
-        ]);
+        $collector->addAssociation(
+            $config['class']['basket'],
+            'mapOneToMany',
+            OptionsBuilder::createOneToMany('basketElements', $config['class']['basket_element'])
+                ->cascade(['persist'])
+                ->mappedBy('basket')
+                ->orphanRemoval()
+        );
 
-        $collector->addAssociation($config['class']['basket_element'], 'mapManyToOne', [
-            'fieldName' => 'basket',
-            'targetEntity' => $config['class']['basket'],
-            'cascade' => [],
-            'mappedBy' => null,
-            'inversedBy' => 'basketElements',
-            'joinColumns' => [
-                [
+        $collector->addAssociation(
+            $config['class']['basket_element'],
+            'mapManyToOne',
+            OptionsBuilder::createManyToOne('basket', $config['class']['basket'])
+                ->inversedBy('basketElements')
+                ->addJoin([
                     'name' => 'basket_id',
                     'referencedColumnName' => 'id',
                     'onDelete' => 'CASCADE',
-                ],
-            ],
-            'orphanRemoval' => false,
-        ]);
+                ])
+         );
     }
 }

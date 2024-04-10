@@ -13,7 +13,8 @@ declare(strict_types=1);
 
 namespace Sonata\CustomerBundle\DependencyInjection;
 
-use Sonata\EasyExtendsBundle\Mapper\DoctrineCollector;
+use Sonata\Doctrine\Mapper\Builder\OptionsBuilder;
+use Sonata\Doctrine\Mapper\DoctrineCollector;
 use Symfony\Component\Config\Definition\Processor;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
@@ -100,71 +101,55 @@ class SonataCustomerExtension extends Extension implements PrependExtensionInter
 
         $collector = DoctrineCollector::getInstance();
 
-        $collector->addAssociation($config['class']['customer'], 'mapOneToMany', [
-            'fieldName' => 'addresses',
-            'targetEntity' => $config['class']['address'],
-            'cascade' => [
-                'persist',
-            ],
-            'mappedBy' => 'customer',
-            'orphanRemoval' => false,
-        ]);
+        $collector->addAssociation(
+            $config['class']['customer'],
+            'mapOneToMany',
+            OptionsBuilder::createOneToMany('addresses', $config['class']['address'])
+                ->cascade(['persist'])
+                ->mappedBy('customer')
+        );
 
-        $collector->addAssociation($config['class']['customer'], 'mapOneToMany', [
-            'fieldName' => 'orders',
-            'targetEntity' => $config['class']['order'],
-            'cascade' => [
-                'persist',
-            ],
-            'mappedBy' => 'customer',
-            'orphanRemoval' => false,
-        ]);
+        $collector->addAssociation(
+            $config['class']['customer'],
+            'mapOneToMany',
+            OptionsBuilder::createOneToMany('orders', $config['class']['order'])
+                ->cascade(['persist'])
+                ->mappedBy('customer')
+        );
 
-        $collector->addAssociation($config['class']['customer'], 'mapManyToOne', [
-            'fieldName' => 'user',
-            'targetEntity' => $config['class']['user'],
-            'cascade' => [
-                'persist',
-            ],
-            'mappedBy' => null,
-            'inversedBy' => 'customers',
-            'joinColumns' => [
-                [
+        $collector->addAssociation(
+            $config['class']['customer'],
+            'mapManyToOne',
+            OptionsBuilder::createManyToOne('user', $config['class']['user'])
+                ->cascade(['persist'])
+                ->inversedBy('customers')
+                ->addJoin([
                     'name' => 'user_id',
                     'referencedColumnName' => $config['field']['customer']['user'],
                     'onDelete' => 'SET NULL',
-                ],
-            ],
-            'orphanRemoval' => false,
-        ]);
+                ])
+        );
 
-        $collector->addAssociation($config['class']['user'], 'mapOneToMany', [
-            'fieldName' => 'customers',
-            'targetEntity' => $config['class']['customer'],
-            'cascade' => [
-                'persist',
-            ],
-            'mappedBy' => 'user',
-            'orphanRemoval' => false,
-        ]);
+        $collector->addAssociation(
+            $config['class']['user'],
+            'mapOneToMany',
+            OptionsBuilder::createOneToMany('customers', $config['class']['customer'])
+                ->cascade(['persist'])
+                ->mappedBy('user')
+        );
 
-        $collector->addAssociation($config['class']['address'], 'mapManyToOne', [
-            'fieldName' => 'customer',
-            'targetEntity' => $config['class']['customer'],
-            'cascade' => [
-                'persist',
-            ],
-            'mappedBy' => null,
-            'inversedBy' => 'addresses',
-            'joinColumns' => [
-                [
+        $collector->addAssociation(
+            $config['class']['address'],
+            'mapManyToOne',
+            OptionsBuilder::createManyToOne('customer', $config['class']['customer'])
+                ->cascade(['persist'])
+                ->inversedBy('addresses')
+                ->addJoin([
                     'name' => 'customer_id',
                     'referencedColumnName' => 'id',
                     'onDelete' => 'CASCADE',
-                ],
-            ],
-            'orphanRemoval' => false,
-        ]);
+                ])
+        );
     }
 
     private function configureCustomerProfile(ContainerBuilder $container, array $config)

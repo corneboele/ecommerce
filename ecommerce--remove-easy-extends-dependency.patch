@@ -1,0 +1,884 @@
+diff --git a/src/BasketBundle/DependencyInjection/SonataBasketExtension.php b/src/BasketBundle/DependencyInjection/SonataBasketExtension.php
+index a24fba5e..8241c983 100644
+--- a/src/BasketBundle/DependencyInjection/SonataBasketExtension.php
++++ b/src/BasketBundle/DependencyInjection/SonataBasketExtension.php
+@@ -13,7 +13,8 @@ declare(strict_types=1);
+ 
+ namespace Sonata\BasketBundle\DependencyInjection;
+ 
+-use Sonata\EasyExtendsBundle\Mapper\DoctrineCollector;
++use Sonata\Doctrine\Mapper\Builder\OptionsBuilder;
++use Sonata\Doctrine\Mapper\DoctrineCollector;
+ use Symfony\Component\Config\Definition\Processor;
+ use Symfony\Component\Config\FileLocator;
+ use Symfony\Component\DependencyInjection\ContainerBuilder;
+@@ -82,47 +83,37 @@ class SonataBasketExtension extends Extension
+ 
+         $collector = DoctrineCollector::getInstance();
+ 
+-        $collector->addAssociation($config['class']['basket'], 'mapManyToOne', [
+-             'fieldName' => 'customer',
+-             'targetEntity' => $config['class']['customer'],
+-             'cascade' => [],
+-             'mappedBy' => null,
+-             'inversedBy' => null,
+-             'joinColumns' => [
+-                 [
+-                     'name' => 'customer_id',
+-                     'referencedColumnName' => 'id',
+-                     'onDelete' => 'CASCADE',
+-                     'unique' => true,
+-                 ],
+-             ],
+-             'orphanRemoval' => false,
+-        ]);
+-
+-        $collector->addAssociation($config['class']['basket'], 'mapOneToMany', [
+-             'fieldName' => 'basketElements',
+-             'targetEntity' => $config['class']['basket_element'],
+-             'cascade' => [
+-                 'persist',
+-             ],
+-             'mappedBy' => 'basket',
+-             'orphanRemoval' => true,
+-        ]);
+-
+-        $collector->addAssociation($config['class']['basket_element'], 'mapManyToOne', [
+-            'fieldName' => 'basket',
+-            'targetEntity' => $config['class']['basket'],
+-            'cascade' => [],
+-            'mappedBy' => null,
+-            'inversedBy' => 'basketElements',
+-            'joinColumns' => [
+-                [
++        $collector->addAssociation(
++            $config['class']['basket'],
++            'mapManyToOne',
++            OptionsBuilder::createManyToOne('customer', $config['class']['customer'])
++                ->addJoin([
++                    'name' => 'customer_id',
++                    'referencedColumnName' => 'id',
++                    'onDelete' => 'CASCADE',
++                    'unique' => true,
++                ])
++        );
++
++        $collector->addAssociation(
++            $config['class']['basket'],
++            'mapOneToMany',
++            OptionsBuilder::createOneToMany('basketElements', $config['class']['basket_element'])
++                ->cascade(['persist'])
++                ->mappedBy('basket')
++                ->orphanRemoval()
++        );
++
++        $collector->addAssociation(
++            $config['class']['basket_element'],
++            'mapManyToOne',
++            OptionsBuilder::createManyToOne('basket', $config['class']['basket'])
++                ->inversedBy('basketElements')
++                ->addJoin([
+                     'name' => 'basket_id',
+                     'referencedColumnName' => 'id',
+                     'onDelete' => 'CASCADE',
+-                ],
+-            ],
+-            'orphanRemoval' => false,
+-        ]);
++                ])
++         );
+     }
+ }
+diff --git a/src/CustomerBundle/DependencyInjection/SonataCustomerExtension.php b/src/CustomerBundle/DependencyInjection/SonataCustomerExtension.php
+index 871375ba..c1018a22 100644
+--- a/src/CustomerBundle/DependencyInjection/SonataCustomerExtension.php
++++ b/src/CustomerBundle/DependencyInjection/SonataCustomerExtension.php
+@@ -13,7 +13,8 @@ declare(strict_types=1);
+ 
+ namespace Sonata\CustomerBundle\DependencyInjection;
+ 
+-use Sonata\EasyExtendsBundle\Mapper\DoctrineCollector;
++use Sonata\Doctrine\Mapper\Builder\OptionsBuilder;
++use Sonata\Doctrine\Mapper\DoctrineCollector;
+ use Symfony\Component\Config\Definition\Processor;
+ use Symfony\Component\Config\FileLocator;
+ use Symfony\Component\DependencyInjection\ContainerBuilder;
+@@ -100,71 +101,55 @@ class SonataCustomerExtension extends Extension implements PrependExtensionInter
+ 
+         $collector = DoctrineCollector::getInstance();
+ 
+-        $collector->addAssociation($config['class']['customer'], 'mapOneToMany', [
+-            'fieldName' => 'addresses',
+-            'targetEntity' => $config['class']['address'],
+-            'cascade' => [
+-                'persist',
+-            ],
+-            'mappedBy' => 'customer',
+-            'orphanRemoval' => false,
+-        ]);
+-
+-        $collector->addAssociation($config['class']['customer'], 'mapOneToMany', [
+-            'fieldName' => 'orders',
+-            'targetEntity' => $config['class']['order'],
+-            'cascade' => [
+-                'persist',
+-            ],
+-            'mappedBy' => 'customer',
+-            'orphanRemoval' => false,
+-        ]);
+-
+-        $collector->addAssociation($config['class']['customer'], 'mapManyToOne', [
+-            'fieldName' => 'user',
+-            'targetEntity' => $config['class']['user'],
+-            'cascade' => [
+-                'persist',
+-            ],
+-            'mappedBy' => null,
+-            'inversedBy' => 'customers',
+-            'joinColumns' => [
+-                [
++        $collector->addAssociation(
++            $config['class']['customer'],
++            'mapOneToMany',
++            OptionsBuilder::createOneToMany('addresses', $config['class']['address'])
++                ->cascade(['persist'])
++                ->mappedBy('customer')
++        );
++
++        $collector->addAssociation(
++            $config['class']['customer'],
++            'mapOneToMany',
++            OptionsBuilder::createOneToMany('orders', $config['class']['order'])
++                ->cascade(['persist'])
++                ->mappedBy('customer')
++        );
++
++        $collector->addAssociation(
++            $config['class']['customer'],
++            'mapManyToOne',
++            OptionsBuilder::createManyToOne('user', $config['class']['user'])
++                ->cascade(['persist'])
++                ->inversedBy('customers')
++                ->addJoin([
+                     'name' => 'user_id',
+                     'referencedColumnName' => $config['field']['customer']['user'],
+                     'onDelete' => 'SET NULL',
+-                ],
+-            ],
+-            'orphanRemoval' => false,
+-        ]);
+-
+-        $collector->addAssociation($config['class']['user'], 'mapOneToMany', [
+-            'fieldName' => 'customers',
+-            'targetEntity' => $config['class']['customer'],
+-            'cascade' => [
+-                'persist',
+-            ],
+-            'mappedBy' => 'user',
+-            'orphanRemoval' => false,
+-        ]);
+-
+-        $collector->addAssociation($config['class']['address'], 'mapManyToOne', [
+-            'fieldName' => 'customer',
+-            'targetEntity' => $config['class']['customer'],
+-            'cascade' => [
+-                'persist',
+-            ],
+-            'mappedBy' => null,
+-            'inversedBy' => 'addresses',
+-            'joinColumns' => [
+-                [
++                ])
++        );
++
++        $collector->addAssociation(
++            $config['class']['user'],
++            'mapOneToMany',
++            OptionsBuilder::createOneToMany('customers', $config['class']['customer'])
++                ->cascade(['persist'])
++                ->mappedBy('user')
++        );
++
++        $collector->addAssociation(
++            $config['class']['address'],
++            'mapManyToOne',
++            OptionsBuilder::createManyToOne('customer', $config['class']['customer'])
++                ->cascade(['persist'])
++                ->inversedBy('addresses')
++                ->addJoin([
+                     'name' => 'customer_id',
+                     'referencedColumnName' => 'id',
+                     'onDelete' => 'CASCADE',
+-                ],
+-            ],
+-            'orphanRemoval' => false,
+-        ]);
++                ])
++        );
+     }
+ 
+     private function configureCustomerProfile(ContainerBuilder $container, array $config)
+diff --git a/src/InvoiceBundle/DependencyInjection/SonataInvoiceExtension.php b/src/InvoiceBundle/DependencyInjection/SonataInvoiceExtension.php
+index 762b265a..a0268556 100644
+--- a/src/InvoiceBundle/DependencyInjection/SonataInvoiceExtension.php
++++ b/src/InvoiceBundle/DependencyInjection/SonataInvoiceExtension.php
+@@ -13,7 +13,8 @@ declare(strict_types=1);
+ 
+ namespace Sonata\InvoiceBundle\DependencyInjection;
+ 
+-use Sonata\EasyExtendsBundle\Mapper\DoctrineCollector;
++use Sonata\Doctrine\Mapper\Builder\OptionsBuilder;
++use Sonata\Doctrine\Mapper\DoctrineCollector;
+ use Symfony\Component\Config\Definition\Processor;
+ use Symfony\Component\Config\FileLocator;
+ use Symfony\Component\DependencyInjection\ContainerBuilder;
+@@ -78,68 +79,49 @@ class SonataInvoiceExtension extends Extension
+         /*
+          * INVOICE
+          */
+-        $collector->addAssociation($config['class']['invoice'], 'mapManyToOne', [
+-             'fieldName' => 'customer',
+-             'targetEntity' => $config['class']['customer'],
+-             'cascade' => [
+-                 'persist',
+-                 'refresh',
+-                 'merge',
+-                 'detach',
+-             ],
+-             'mappedBy' => null,
+-             'joinColumns' => [
+-                 [
+-                     'name' => 'customer_id',
+-                     'referencedColumnName' => 'id',
+-                     'onDelete' => 'SET NULL',
+-                 ],
+-             ],
+-             'orphanRemoval' => false,
+-        ]);
+-
+-        $collector->addAssociation($config['class']['invoice_element'], 'mapManyToOne', [
+-             'fieldName' => 'invoice',
+-             'targetEntity' => $config['class']['invoice'],
+-             'cascade' => [
+-                 'persist',
+-                 'refresh',
+-                 'merge',
+-                 'detach',
+-             ],
+-             'mappedBy' => null,
+-             'inversedBy' => 'invoiceElements',
+-             'joinColumns' => [
+-                 [
+-                     'name' => 'invoice_id',
+-                     'referencedColumnName' => 'id',
+-                     'onDelete' => 'CASCADE',
+-                 ],
+-             ],
+-             'orphanRemoval' => false,
+-        ]);
+-
+-        $collector->addAssociation($config['class']['invoice'], 'mapOneToMany', [
+-             'fieldName' => 'invoiceElements',
+-             'targetEntity' => $config['class']['invoice_element'],
+-             'cascade' => [
+-                 'persist',
+-             ],
+-             'mappedBy' => 'invoice',
+-             'orphanRemoval' => true,
+-        ]);
+-
+-        $collector->addAssociation($config['class']['invoice_element'], 'mapManyToOne', [
+-            'fieldName' => 'orderElement',
+-            'targetEntity' => $config['class']['order_element'],
+-            'cascade' => [],
+-            'joinColumns' => [
+-                 [
+-                     'name' => 'order_element_id',
+-                     'referencedColumnName' => 'id',
+-                     'onDelete' => 'CASCADE',
+-                 ],
+-             ],
+-        ]);
++        $collector->addAssociation(
++            $config['class']['invoice'],
++            'mapManyToOne',
++            OptionsBuilder::createManyToOne('customer', $config['class']['customer'])
++                ->cascade(['persist', 'refresh', 'merge', 'detach'])
++                ->addJoin([
++                    'name' => 'customer_id',
++                    'referencedColumnName' => 'id',
++                    'onDelete' => 'SET NULL',
++                ])
++    );
++
++        $collector->addAssociation(
++            $config['class']['invoice_element'],
++            'mapManyToOne',
++            OptionsBuilder::createManyToOne('invoice', $config['class']['invoice'])
++                ->cascade(['persist', 'refresh', 'merge', 'detach'])
++                ->inversedBy('invoiceElements')
++                ->addJoin([
++                    'name' => 'invoice_id',
++                    'referencedColumnName' => 'id',
++                    'onDelete' => 'CASCADE',
++                ])
++        );
++
++        $collector->addAssociation(
++            $config['class']['invoice'],
++            'mapOneToMany',
++            OptionsBuilder::createOneToMany('invoiceElements', $config['class']['invoice_element'])
++                ->cascade(['persist'])
++                ->mappedBy('invoice')
++                ->orphanRemoval()
++        );
++
++        $collector->addAssociation(
++            $config['class']['invoice_element'],
++            'mapManyToOne',
++            OptionsBuilder::createManyToOne('orderElement', $config['class']['order_element'])
++                ->addJoin([
++                    'name' => 'order_element_id',
++                    'referencedColumnName' => 'id',
++                    'onDelete' => 'CASCADE',
++                ])
++        );
+     }
+ }
+diff --git a/src/OrderBundle/DependencyInjection/SonataOrderExtension.php b/src/OrderBundle/DependencyInjection/SonataOrderExtension.php
+index 5afc9e06..d79f2425 100644
+--- a/src/OrderBundle/DependencyInjection/SonataOrderExtension.php
++++ b/src/OrderBundle/DependencyInjection/SonataOrderExtension.php
+@@ -13,7 +13,8 @@ declare(strict_types=1);
+ 
+ namespace Sonata\OrderBundle\DependencyInjection;
+ 
+-use Sonata\EasyExtendsBundle\Mapper\DoctrineCollector;
++use Sonata\Doctrine\Mapper\Builder\OptionsBuilder;
++use Sonata\Doctrine\Mapper\DoctrineCollector;
+ use Symfony\Component\Config\Definition\Processor;
+ use Symfony\Component\Config\FileLocator;
+ use Symfony\Component\DependencyInjection\ContainerBuilder;
+@@ -77,47 +78,37 @@ class SonataOrderExtension extends Extension
+ 
+         $collector = DoctrineCollector::getInstance();
+ 
+-        $collector->addAssociation($config['class']['order'], 'mapOneToMany', [
+-            'fieldName' => 'orderElements',
+-            'targetEntity' => $config['class']['order_element'],
+-            'cascade' => [
+-                 'persist',
+-            ],
+-            'mappedBy' => 'order',
+-            'orphanRemoval' => false,
+-        ]);
+-
+-        $collector->addAssociation($config['class']['order'], 'mapManyToOne', [
+-           'fieldName' => 'customer',
+-           'targetEntity' => $config['class']['customer'],
+-           'cascade' => [],
+-           'mappedBy' => null,
+-           'inversedBy' => 'orders',
+-           'joinColumns' => [
+-                [
++        $collector->addAssociation(
++            $config['class']['order'],
++            'mapOneToMany',
++            OptionsBuilder::createOneToMany('orderElements', $config['class']['order_element'])
++                ->cascade(['persist'])
++                ->mappedBy('order')
++        );
++
++        $collector->addAssociation(
++            $config['class']['order'],
++            'mapManyToOne',
++            OptionsBuilder::createManyToOne('customer', $config['class']['customer'])
++                ->inversedBy('orders')
++                ->addJoin([
+                     'name' => 'customer_id',
+                     'referencedColumnName' => 'id',
+                     'onDelete' => 'SET NULL',
+-                ],
+-           ],
+-           'orphanRemoval' => false,
+-        ]);
+-
+-        $collector->addAssociation($config['class']['order_element'], 'mapManyToOne', [
+-            'fieldName' => 'order',
+-            'targetEntity' => $config['class']['order'],
+-            'cascade' => [],
+-            'mappedBy' => null,
+-            'inversedBy' => 'orderElements',
+-            'joinColumns' => [
+-                [
++                ])
++        );
++
++        $collector->addAssociation(
++            $config['class']['order_element'],
++            'mapManyToOne',
++            OptionsBuilder::createManyToOne('order', $config['class']['order'])
++                ->inversedBy('orderElements')
++                ->addJoin([
+                     'name' => 'order_id',
+                     'referencedColumnName' => 'id',
+                     'onDelete' => 'CASCADE',
+-                ],
+-            ],
+-            'orphanRemoval' => false,
+-        ]);
++                ])
++        );
+ 
+         $collector->addIndex($config['class']['order_element'], 'product_type', [
+             'product_type',
+diff --git a/src/PaymentBundle/DependencyInjection/SonataPaymentExtension.php b/src/PaymentBundle/DependencyInjection/SonataPaymentExtension.php
+index 12215044..f913b4bb 100644
+--- a/src/PaymentBundle/DependencyInjection/SonataPaymentExtension.php
++++ b/src/PaymentBundle/DependencyInjection/SonataPaymentExtension.php
+@@ -13,7 +13,8 @@ declare(strict_types=1);
+ 
+ namespace Sonata\PaymentBundle\DependencyInjection;
+ 
+-use Sonata\EasyExtendsBundle\Mapper\DoctrineCollector;
++use Sonata\Doctrine\Mapper\Builder\OptionsBuilder;
++use Sonata\Doctrine\Mapper\DoctrineCollector;
+ use Symfony\Component\Config\Definition\Processor;
+ use Symfony\Component\Config\FileLocator;
+ use Symfony\Component\DependencyInjection\ContainerBuilder;
+@@ -181,21 +182,16 @@ class SonataPaymentExtension extends Extension
+ 
+         $collector = DoctrineCollector::getInstance();
+ 
+-        $collector->addAssociation($config['class']['transaction'], 'mapManyToOne', [
+-            'fieldName' => 'order',
+-            'targetEntity' => $config['class']['order'],
+-            'cascade' => [],
+-            'mappedBy' => null,
+-            'inversedBy' => null,
+-            'joinColumns' => [
+-                [
++        $collector->addAssociation(
++            $config['class']['transaction'],
++            'mapManyToOne',
++            OptionsBuilder::createManyToOne('order', $config['class']['order'])
++                ->addJoin([
+                     'name' => 'order_id',
+                     'referencedColumnName' => 'id',
+                     'onDelete' => 'SET NULL',
+-                ],
+-            ],
+-            'orphanRemoval' => false,
+-        ]);
++                ])
++        );
+ 
+         $collector->addIndex($config['class']['transaction'], 'status_code', [
+             'status_code',
+diff --git a/src/ProductBundle/DependencyInjection/SonataProductExtension.php b/src/ProductBundle/DependencyInjection/SonataProductExtension.php
+index 47cd50aa..28712102 100644
+--- a/src/ProductBundle/DependencyInjection/SonataProductExtension.php
++++ b/src/ProductBundle/DependencyInjection/SonataProductExtension.php
+@@ -13,7 +13,8 @@ declare(strict_types=1);
+ 
+ namespace Sonata\ProductBundle\DependencyInjection;
+ 
+-use Sonata\EasyExtendsBundle\Mapper\DoctrineCollector;
++use Sonata\Doctrine\Mapper\Builder\OptionsBuilder;
++use Sonata\Doctrine\Mapper\DoctrineCollector;
+ use Symfony\Component\Config\Definition\Processor;
+ use Symfony\Component\Config\FileLocator;
+ use Symfony\Component\DependencyInjection\ContainerBuilder;
+@@ -90,106 +91,81 @@ class SonataProductExtension extends Extension
+         /*
+          * DELIVERY
+          */
+-        $collector->addAssociation($config['class']['delivery'], 'mapManyToOne', [
+-            'fieldName' => 'product',
+-            'targetEntity' => $config['class']['product'],
+-            'cascade' => [
+-                'persist',
+-            ],
+-            'mappedBy' => null,
+-            'inversedBy' => 'deliveries',
+-            'joinColumns' => [
+-                [
++        $collector->addAssociation(
++            $config['class']['delivery'],
++            'mapManyToOne',
++            OptionsBuilder::createManyToOne('product', $config['class']['product'])
++                ->cascade(['persist'])
++                ->inversedBy('deliveries')
++                ->addJoin([
+                     'name' => 'product_id',
+                     'referencedColumnName' => 'id',
+                     'onDelete' => 'CASCADE',
+-                ],
+-            ],
+-            'orphanRemoval' => false,
+-        ]);
++                ])
++        );
+ 
+         /*
+          * PACKAGE
+          */
+-        $collector->addAssociation($config['class']['package'], 'mapManyToOne', [
+-            'fieldName' => 'product',
+-            'targetEntity' => $config['class']['product'],
+-            'cascade' => [
+-                'persist',
+-            ],
+-            'mappedBy' => null,
+-            'inversedBy' => 'packages',
+-            'joinColumns' => [
+-                [
++        $collector->addAssociation(
++            $config['class']['package'],
++            'mapManyToOne',
++            OptionsBuilder::createManyToOne('product', $config['class']['product'])
++                ->cascade(['persist'])
++                ->inversedBy('packages')
++                ->addJoin([
+                     'name' => 'product_id',
+                     'referencedColumnName' => 'id',
+                     'onDelete' => 'CASCADE',
+-                ],
+-            ],
+-            'orphanRemoval' => false,
+-        ]);
++                ])
++        );
+ 
+         /*
+          * PRODUCT CATEGORY
+          */
+-        $collector->addAssociation($config['class']['product_category'], 'mapManyToOne', [
+-             'fieldName' => 'product',
+-             'targetEntity' => $config['class']['product'],
+-             'cascade' => [
+-                'persist',
+-             ],
+-             'mappedBy' => null,
+-             'inversedBy' => 'productCategories',
+-             'joinColumns' => [
+-                 [
+-                     'name' => 'product_id',
+-                     'referencedColumnName' => 'id',
+-                     'onDelete' => 'CASCADE',
+-                     'onUpdate' => 'CASCADE',
+-                 ],
+-             ],
+-             'orphanRemoval' => false,
+-        ]);
+-
+-        $collector->addAssociation($config['class']['product_category'], 'mapManyToOne', [
+-             'fieldName' => 'category',
+-             'targetEntity' => $config['class']['category'],
+-             'cascade' => [
+-                'persist',
+-             ],
+-             'mappedBy' => null,
+-             'joinColumns' => [
+-                 [
+-                     'name' => 'category_id',
+-                     'referencedColumnName' => 'id',
+-                     'onDelete' => 'CASCADE',
+-                     'onUpdate' => 'CASCADE',
+-                 ],
+-             ],
+-             'orphanRemoval' => false,
+-        ]);
++        $collector->addAssociation(
++            $config['class']['product_category'],
++            'mapManyToOne',
++            OptionsBuilder::createManyToOne('product', $config['class']['product'])
++                ->cascade(['persist'])
++                ->inversedBy('productCategories')
++                ->addJoin([
++                    'name' => 'product_id',
++                    'referencedColumnName' => 'id',
++                    'onDelete' => 'CASCADE',
++                    'onUpdate' => 'CASCADE',
++                ])
++        );
++
++        $collector->addAssociation(
++            $config['class']['product_category'],
++            'mapManyToOne',
++            OptionsBuilder::createManyToOne('category', $config['class']['category'])
++                ->cascade(['persist'])
++                ->addJoin([
++                    'name' => 'category_id',
++                    'referencedColumnName' => 'id',
++                    'onDelete' => 'CASCADE',
++                    'onUpdate' => 'CASCADE',
++                ])
++        );
+ 
+         /*
+          * PRODUCT COLLECTION
+          */
+-        $collector->addAssociation($config['class']['product_collection'], 'mapManyToOne', [
+-             'fieldName' => 'product',
+-             'targetEntity' => $config['class']['product'],
+-             'cascade' => [
+-                'persist',
+-             ],
+-             'mappedBy' => null,
+-             'inversedBy' => 'productCollections',
+-             'joinColumns' => [
+-                 [
+-                     'name' => 'product_id',
+-                     'referencedColumnName' => 'id',
+-                     'onDelete' => 'CASCADE',
+-                     'onUpdate' => 'CASCADE',
+-                 ],
+-             ],
+-             'orphanRemoval' => false,
+-        ]);
++        $collector->addAssociation(
++            $config['class']['product_collection'],
++            'mapManyToOne',
++            OptionsBuilder::createManyToOne('product', $config['class']['product'])
++                ->cascade(['persist'])
++                ->inversedBy('productCollections')
++                ->addJoin([
++                    'name' => 'product_id',
++                    'referencedColumnName' => 'id',
++                    'onDelete' => 'CASCADE',
++                    'onUpdate' => 'CASCADE',
++                ])
++        );
+ 
+         /**
+          * NEXT_MAJOR: remove this check, the inverse declaration below
+@@ -201,139 +177,108 @@ class SonataProductExtension extends Extension
+             $addCollectionAssociation = true;
+         }
+ 
+-        $collector->addAssociation($config['class']['product_collection'], 'mapManyToOne', [
+-             'fieldName' => 'collection',
+-             'targetEntity' => $config['class']['collection'],
+-             'cascade' => [
+-                'persist',
+-             ],
+-             'mappedBy' => null,
+-             'inversedBy' => ($addCollectionAssociation ? 'productCollection' : null),
+-             'joinColumns' => [
+-                 [
+-                     'name' => 'collection_id',
+-                     'referencedColumnName' => 'id',
+-                     'onDelete' => 'CASCADE',
+-                     'onUpdate' => 'CASCADE',
+-                 ],
+-             ],
+-             'orphanRemoval' => false,
+-        ]);
++        $collector->addAssociation(
++            $config['class']['product_collection'],
++            'mapManyToOne',
++            OptionsBuilder::createManyToOne('collection', $config['class']['collection'])
++                ->cascade(['persist'])
++                ->inversedBy(($addCollectionAssociation ? 'productCollection' : null))
++                ->addJoin([
++                    'name' => 'collection_id',
++                    'referencedColumnName' => 'id',
++                    'onDelete' => 'CASCADE',
++                    'onUpdate' => 'CASCADE',
++                ])
++        );
+ 
+         if ($addCollectionAssociation) {
+-            $collector->addAssociation($config['class']['collection'], 'mapOneToMany', [
+-                'fieldName' => 'productCollection',
+-                'targetEntity' => $config['class']['product_collection'],
+-                'cascade' => [
+-                    'persist',
+-                ],
+-                'mappedBy' => 'collection',
+-                'orphanRemoval' => false,
+-            ]);
++            $collector->addAssociation(
++                $config['class']['collection'],
++                'mapOneToMany',
++                OptionsBuilder::createOneToMany('productCollection', $config['class']['product_collection'])
++                    ->cascade(['persist'])
++                    ->mappedBy('collection')
++            );
+         }
+ 
+         /*
+          * PRODUCT
+          */
+-        $collector->addAssociation($config['class']['product'], 'mapOneToMany', [
+-            'fieldName' => 'packages',
+-            'targetEntity' => $config['class']['package'],
+-            'cascade' => [
+-               'persist',
+-            ],
+-            'mappedBy' => 'product',
+-            'orphanRemoval' => false,
+-        ]);
+-
+-        $collector->addAssociation($config['class']['product'], 'mapOneToMany', [
+-             'fieldName' => 'deliveries',
+-             'targetEntity' => $config['class']['delivery'],
+-             'cascade' => [
+-                 'persist',
+-             ],
+-             'mappedBy' => 'product',
+-             'orphanRemoval' => false,
+-        ]);
+-
+-        $collector->addAssociation($config['class']['product'], 'mapOneToMany', [
+-             'fieldName' => 'productCategories',
+-             'targetEntity' => $config['class']['product_category'],
+-             'cascade' => [
+-                'persist',
+-             ],
+-             'mappedBy' => 'product',
+-             'orphanRemoval' => false,
+-        ]);
+-
+-        $collector->addAssociation($config['class']['product'], 'mapOneToMany', [
+-             'fieldName' => 'productCollections',
+-             'targetEntity' => $config['class']['product_collection'],
+-             'cascade' => [
+-                'persist',
+-             ],
+-             'mappedBy' => 'product',
+-             'orphanRemoval' => false,
+-        ]);
+-
+-        $collector->addAssociation($config['class']['product'], 'mapManyToOne', [
+-            'fieldName' => 'image',
+-            'targetEntity' => $config['class']['media'],
+-            'cascade' => [],
+-            'mappedBy' => null,
+-            'inversedBy' => null,
+-            'joinColumns' => [
+-                [
++        $collector->addAssociation(
++            $config['class']['product'],
++            'mapOneToMany',
++            OptionsBuilder::createOneToMany('packages', $config['class']['package'])
++                ->cascade(['persist'])
++                ->mappedBy('product')
++
++        );
++
++        $collector->addAssociation(
++            $config['class']['product'],
++            'mapOneToMany',
++            OptionsBuilder::createOneToMany('deliveries', $config['class']['delivery'])
++                ->cascade(['persist'])
++                ->mappedBy('product')
++        );
++
++        $collector->addAssociation(
++            $config['class']['product'],
++            'mapOneToMany',
++            OptionsBuilder::createOneToMany('productCategories', $config['class']['product_category'])
++                ->cascade(['persist'])
++                ->mappedBy('product')
++        );
++
++        $collector->addAssociation(
++            $config['class']['product'],
++            'mapOneToMany',
++            OptionsBuilder::createOneToMany('productCollections', $config['class']['product_collection'])
++                ->cascade(['persist'])
++                ->mappedBy('product')
++        );
++
++        $collector->addAssociation(
++            $config['class']['product'],
++            'mapManyToOne',
++            OptionsBuilder::createManyToOne('image', $config['class']['media'])
++                ->addJoin([
+                     'name' => 'image_id',
+                     'referencedColumnName' => 'id',
+                     'onDelete' => 'SET NULL',
+-                ],
+-            ],
+-            'orphanRemoval' => false,
+-        ]);
+-
+-        $collector->addAssociation($config['class']['product'], 'mapManyToOne', [
+-             'fieldName' => 'gallery',
+-             'targetEntity' => $config['class']['gallery'],
+-             'cascade' => [],
+-             'mappedBy' => null,
+-             'inversedBy' => null,
+-             'joinColumns' => [
+-                 [
+-                     'name' => 'gallery_id',
+-                     'referencedColumnName' => 'id',
+-                     'onDelete' => 'SET NULL',
+-                 ],
+-             ],
+-             'orphanRemoval' => false,
+-        ]);
+-
+-        $collector->addAssociation($config['class']['product'], 'mapManyToOne', [
+-            'fieldName' => 'parent',
+-            'targetEntity' => $config['class']['product'],
+-            'cascade' => [
+-                'persist',
+-            ],
+-            'mappedBy' => null,
+-            'inversedBy' => 'variations',
+-            'joinColumns' => [
+-                [
++                ])
++        );
++
++        $collector->addAssociation(
++            $config['class']['product'],
++            'mapManyToOne',
++            OptionsBuilder::createManyToOne('gallery', $config['class']['gallery'])
++                ->addJoin([
++                    'name' => 'gallery_id',
++                    'referencedColumnName' => 'id',
++                    'onDelete' => 'SET NULL',
++                ])
++        );
++
++        $collector->addAssociation(
++            $config['class']['product'],
++            'mapManyToOne',
++            OptionsBuilder::createManyToOne('parent', $config['class']['product'])
++                ->cascade(['persist'])
++                ->inversedBy('variations')
++                ->addJoin([
+                     'name' => 'parent_id',
+                     'referencedColumnName' => 'id',
+                     'onDelete' => 'CASCADE',
+-                ],
+-            ],
+-            'orphanRemoval' => false,
+-        ]);
+-
+-        $collector->addAssociation($config['class']['product'], 'mapOneToMany', [
+-            'fieldName' => 'variations',
+-            'targetEntity' => $config['class']['product'],
+-            'cascade' => [
+-                'persist',
+-            ],
+-            'mappedBy' => 'parent',
+-            'orphanRemoval' => false,
+-        ]);
++                ])
++        );
++
++        $collector->addAssociation(
++            $config['class']['product'],
++            'mapOneToMany',
++            OptionsBuilder::createOneToMany('variations', $config['class']['product'])
++                ->cascade(['persist'])
++                ->mappedBy('parent')
++        );
+ 
+         $collector->addIndex($config['class']['product'], 'enabled', [
+             'enabled',
