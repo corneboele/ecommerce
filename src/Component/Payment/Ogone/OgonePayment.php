@@ -19,7 +19,7 @@ use Sonata\Component\Order\OrderInterface;
 use Sonata\Component\Payment\BasePayment;
 use Sonata\Component\Payment\TransactionInterface;
 use Sonata\Component\Product\ProductInterface;
-use Symfony\Bundle\FrameworkBundle\Templating\EngineInterface;
+use Twig\Environment;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
@@ -38,14 +38,14 @@ class OgonePayment extends BasePayment
     protected $router;
 
     /**
-     * @var EngineInterface
+     * @var Environment
      */
     protected $templating;
 
     /**
      * @param bool $debug
      */
-    public function __construct(RouterInterface $router, LoggerInterface $logger, EngineInterface $templating, $debug)
+    public function __construct(RouterInterface $router, LoggerInterface $logger, Environment $templating, $debug)
     {
         $this->templating = $templating;
         $this->router = $router;
@@ -136,12 +136,12 @@ class OgonePayment extends BasePayment
 
     public function sendbank(OrderInterface $order)
     {
-        return $this->templating->renderResponse($this->getOption('template'), [
+        return new Response($this->templating->render($this->getOption('template'), [
             'form_url' => $this->getOption('form_url'),
             'shasign' => $this->getShaSign($this->getFormParameters($order)),
             'fields' => $this->getFormParameters($order),
             'debug' => $this->debug,
-        ]);
+        ]));
     }
 
     public function encodeString($string)

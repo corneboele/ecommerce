@@ -21,7 +21,7 @@ use Sonata\BlockBundle\Model\BlockInterface;
 use Sonata\Component\Customer\CustomerManagerInterface;
 use Sonata\Form\Type\ImmutableArrayType;
 use Sonata\Form\Validator\ErrorElement;
-use Symfony\Bundle\FrameworkBundle\Templating\EngineInterface;
+use Twig\Environment;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
@@ -40,12 +40,12 @@ class RecentCustomersBlockService extends AbstractAdminBlockService
     /**
      * @param string $name
      */
-    public function __construct($name, EngineInterface $templating, CustomerManagerInterface $manager, ?Pool $adminPool = null)
+    public function __construct(Environment $templating, CustomerManagerInterface $manager, ?Pool $adminPool = null)
     {
         $this->manager = $manager;
         $this->adminPool = $adminPool;
 
-        parent::__construct($name, $templating);
+        parent::__construct($templating);
     }
 
     public function execute(BlockContextInterface $blockContext, ?Response $response = null)

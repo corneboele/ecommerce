@@ -22,13 +22,13 @@ use Sonata\Component\Customer\CustomerManagerInterface;
 use Sonata\Component\Order\OrderManagerInterface;
 use Sonata\Form\Type\ImmutableArrayType;
 use Sonata\Form\Validator\ErrorElement;
-use Symfony\Bundle\FrameworkBundle\Templating\EngineInterface;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
+use Twig\Environment;
 
 /**
  * @author Thomas Rabaix <thomas.rabaix@sonata-project.org>
@@ -57,8 +57,7 @@ class RecentOrdersBlockService extends BaseBlockService
     protected $adminPool;
 
     public function __construct(
-        string $name,
-        EngineInterface $templating,
+        Environment $templating,
         OrderManagerInterface $orderManager,
         CustomerManagerInterface $customerManager,
         TokenStorageInterface $tokenStorage,
@@ -69,7 +68,7 @@ class RecentOrdersBlockService extends BaseBlockService
         $this->tokenStorage = $tokenStorage;
         $this->adminPool = $adminPool;
 
-        parent::__construct($name, $templating);
+        parent::__construct($templating);
     }
 
     public function execute(BlockContextInterface $blockContext, ?Response $response = null): Response

@@ -26,8 +26,7 @@
         </service>
         <service id="sonata.basket.block.nb_items" class="Sonata\BasketBundle\Block\BasketBlockService">
             <tag name="sonata.block"/>
-            <argument>sonata.basket.block.nb_items</argument>
-            <argument type="service" id="templating"/>
+            <argument type="service" id="twig"/>
         </service>
         <service id="Sonata\BasketBundle\Controller\BasketController">
             <tag name="controller.service_arguments"/>

@@ -23,7 +23,7 @@ use Sonata\Component\Currency\CurrencyDetectorInterface;
 use Sonata\Form\Type\ImmutableArrayType;
 use Sonata\Form\Validator\ErrorElement;
 use Sonata\ProductBundle\Repository\BaseProductRepository;
-use Symfony\Bundle\FrameworkBundle\Templating\EngineInterface;
+use Twig\Environment;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\HttpFoundation\Response;
@@ -48,12 +48,12 @@ class RecentProductsBlockService extends BaseBlockService
      * @param string $name
      * @param string $productClass
      */
-    public function __construct($name, EngineInterface $templating, ManagerRegistry $registry, CurrencyDetectorInterface $currencyDetector, $productClass)
+    public function __construct(Environment $templating, ManagerRegistry $registry, CurrencyDetectorInterface $currencyDetector, $productClass)
     {
         $this->productRepository = $registry->getManager()->getRepository($productClass);
         $this->currencyDetector = $currencyDetector;
 
-        parent::__construct($name, $templating);
+        parent::__construct($templating);
     }
 
     public function execute(BlockContextInterface $blockContext, ?Response $response = null)

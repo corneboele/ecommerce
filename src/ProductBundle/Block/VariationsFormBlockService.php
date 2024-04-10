@@ -21,7 +21,7 @@ use Sonata\Component\Form\Type\VariationChoiceType;
 use Sonata\Component\Product\Pool;
 use Sonata\Component\Product\ProductInterface;
 use Sonata\Form\Validator\ErrorElement;
-use Symfony\Bundle\FrameworkBundle\Templating\EngineInterface;
+use Twig\Environment;
 use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\OptionsResolver\Options;
@@ -46,9 +46,9 @@ class VariationsFormBlockService extends BaseBlockService
     /**
      * @param string $name
      */
-    public function __construct($name, EngineInterface $templating, Pool $productPool, FormFactoryInterface $formFactory)
+    public function __construct(Environment $templating, Pool $productPool, FormFactoryInterface $formFactory)
     {
-        parent::__construct($name, $templating);
+        parent::__construct($templating);
 
         $this->pool = $productPool;
         $this->formFactory = $formFactory;

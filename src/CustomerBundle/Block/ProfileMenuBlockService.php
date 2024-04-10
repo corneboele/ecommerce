@@ -17,7 +17,7 @@ use Knp\Menu\ItemInterface;
 use Knp\Menu\Provider\MenuProviderInterface;
 use Sonata\BlockBundle\Block\BlockContextInterface;
 use Sonata\BlockBundle\Block\Service\MenuBlockService;
-use Symfony\Bundle\FrameworkBundle\Templating\EngineInterface;
+use Twig\Environment;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
 /**
@@ -30,9 +30,9 @@ final class ProfileMenuBlockService extends MenuBlockService
     /**
      * @param object $menuBuilder
      */
-    public function __construct(string $name, EngineInterface $templating, MenuProviderInterface $menuProvider, $menuBuilder)
+    public function __construct(Environment $templating, MenuProviderInterface $menuProvider, $menuBuilder)
     {
-        parent::__construct($name, $templating, $menuProvider, []);
+        parent::__construct($templating, $menuProvider, []);
 
         if (!\is_object($menuBuilder) || !method_exists($menuBuilder, 'createProfileMenu')) {
             throw new \InvalidArgumentException(

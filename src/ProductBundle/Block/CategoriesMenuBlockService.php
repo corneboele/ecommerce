@@ -18,7 +18,7 @@ use Sonata\BlockBundle\Block\BlockContextInterface;
 use Sonata\BlockBundle\Block\Service\MenuBlockService;
 use Sonata\ProductBundle\Menu\ProductMenuBuilder;
 use Symfony\Component\OptionsResolver\OptionsResolver;
-use Symfony\Component\Templating\EngineInterface;
+use Symfony\Component\Templating\Environment;
 
 /**
  * @author Hugo Briand <briand@ekino.com>
@@ -33,9 +33,9 @@ class CategoriesMenuBlockService extends MenuBlockService
     /**
      * @param string $name
      */
-    public function __construct($name, EngineInterface $templating, MenuProviderInterface $menuProvider, ProductMenuBuilder $menuBuilder)
+    public function __construct(Environment $templating, MenuProviderInterface $menuProvider, ProductMenuBuilder $menuBuilder)
     {
-        parent::__construct($name, $templating, $menuProvider, []);
+        parent::__construct($templating, $menuProvider, []);
 
         $this->menuBuilder = $menuBuilder;
     }

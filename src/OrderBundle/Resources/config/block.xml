@@ -3,8 +3,7 @@
     <services>
         <service id="sonata.order.block.recent_orders" class="Sonata\OrderBundle\Block\RecentOrdersBlockService">
             <tag name="sonata.block"/>
-            <argument>sonata.order.block.recent_orders</argument>
-            <argument type="service" id="templating"/>
+            <argument type="service" id="twig"/>
             <argument type="service" id="sonata.order.manager"/>
             <argument type="service" id="sonata.customer.manager"/>
             <argument type="service" id="security.token_storage"/>

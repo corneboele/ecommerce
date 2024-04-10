@@ -19,7 +19,7 @@ use Sonata\Component\Order\OrderInterface;
 use Sonata\Component\Payment\BasePayment;
 use Sonata\Component\Payment\TransactionInterface;
 use Sonata\Component\Product\ProductInterface;
-use Symfony\Bundle\FrameworkBundle\Templating\EngineInterface;
+use Twig\Environment;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Process\Process;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
@@ -38,7 +38,7 @@ class ScelliusPayment extends BasePayment
     protected $parameters;
 
     /**
-     * @var EngineInterface
+     * @var Environment
      */
     protected $templating;
 
@@ -50,7 +50,7 @@ class ScelliusPayment extends BasePayment
     /**
      * @param bool $debug
      */
-    public function __construct(RouterInterface $router, LoggerInterface $logger, EngineInterface $templating, ScelliusTransactionGeneratorInterface $transactionGenerator, $debug)
+    public function __construct(RouterInterface $router, LoggerInterface $logger, Environment $templating, ScelliusTransactionGeneratorInterface $transactionGenerator, $debug)
     {
         $this->templating = $templating;
         $this->router = $router;
@@ -491,12 +491,12 @@ class ScelliusPayment extends BasePayment
             ];
         }
 
-        return $this->templating->renderResponse($this->getOption('template'), [
+        return new Response($this->templating->render($this->getOption('template'), [
             'order' => $order,
             'scellius' => $scellius,
             'debug' => $this->debug,
             'parameters' => $cmdLineParameters,
-        ]);
+        ]));
     }
 
     public function encodeString($string)
