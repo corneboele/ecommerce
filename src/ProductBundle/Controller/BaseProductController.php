@@ -28,6 +28,13 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 abstract class BaseProductController extends AbstractController
 {
+    protected $productPool;
+
+    public function __construct(Pool $productPool)
+    {
+        $this->productPool = $productPool;
+    }
+
     /**
      * @param $product
      *
@@ -41,7 +48,7 @@ abstract class BaseProductController extends AbstractController
             throw new NotFoundHttpException('invalid product instance');
         }
 
-        $provider = $this->get('sonata.product.pool')->getProvider($product);
+        $provider = $this->productPool->getProvider($product);
 
         $formBuilder = $this->get('form.factory')->createNamedBuilder('add_basket', FormType::class, null, ['data_class' => $this->container->getParameter('sonata.basket.basket_element.class'), 'csrf_protection' => false]);
         $provider->defineAddBasketForm($product, $formBuilder);
@@ -72,7 +79,7 @@ abstract class BaseProductController extends AbstractController
      */
     public function renderPropertiesAction(ProductInterface $product)
     {
-        $provider = $this->get('sonata.product.pool')->getProvider($product);
+        $provider = $this->productPool->getProvider($product);
 
         return $this->render(sprintf('%s/properties.html.twig', $provider->getTemplatesPath()), [
             'product' => $product,
@@ -85,7 +92,7 @@ abstract class BaseProductController extends AbstractController
     public function renderFormBasketElementAction(FormView $formView, BasketElementInterface $basketElement, BasketInterface $basket)
     {
         /** @var Pool $pool */
-        $pool = $this->get('sonata.product.pool');
+        $pool = $this->productPool;
         $provider = $pool->getProvider($basketElement->getProduct());
 
         return $this->render(sprintf('%s/form_basket_element.html.twig', $provider->getTemplatesPath()), [
@@ -100,7 +107,7 @@ abstract class BaseProductController extends AbstractController
      */
     public function renderFinalReviewBasketElementAction(BasketElementInterface $basketElement, BasketInterface $basket)
     {
-        $provider = $this->get('sonata.product.pool')->getProvider($basketElement->getProduct());
+        $provider = $this->productPool->getProvider($basketElement->getProduct());
 
         return $this->render(sprintf('%s/final_review_basket_element.html.twig', $provider->getTemplatesPath()), [
             'basketElement' => $basketElement,
@@ -121,7 +128,7 @@ abstract class BaseProductController extends AbstractController
             throw new NotFoundHttpException('invalid product instance');
         }
 
-        $provider = $this->get('sonata.product.pool')->getProvider($product);
+        $provider = $this->productPool->getProvider($product);
 
         return $this->render(sprintf('%s/view_variations.html.twig', $provider->getTemplatesPath()), [
             'product' => $product,
@@ -135,7 +142,7 @@ abstract class BaseProductController extends AbstractController
      */
     public function variationToProductAction(Request $request, ProductInterface $product, ?ProductInterface $variation = null)
     {
-        $provider = $this->get('sonata.product.pool')->getProvider($product);
+        $provider = $this->productPool->getProvider($product);
 
         if (!$provider->hasEnabledVariations($product)) {
             throw new NotFoundHttpException('invalid product instance (no variations)');
