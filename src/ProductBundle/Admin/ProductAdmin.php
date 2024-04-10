@@ -79,7 +79,7 @@ class ProductAdmin extends AbstractAdmin
         }
     }
 
-    public function getPersistentParameters()
+    public function configurePersistentParameters(): array
     {
         if (!$this->hasRequest()) {
             return [];
