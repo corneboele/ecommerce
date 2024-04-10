@@ -18,7 +18,7 @@ use Sonata\BlockBundle\Block\BlockContextInterface;
 use Sonata\BlockBundle\Block\Service\MenuBlockService;
 use Sonata\ProductBundle\Menu\ProductMenuBuilder;
 use Symfony\Component\OptionsResolver\OptionsResolver;
-use Symfony\Component\Templating\Environment;
+use Twig\Environment;
 
 /**
  * @author Hugo Briand <briand@ekino.com>
