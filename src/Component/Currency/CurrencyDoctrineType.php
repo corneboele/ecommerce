@@ -15,7 +15,7 @@ namespace Sonata\Component\Currency;
 
 use Doctrine\DBAL\Platforms\AbstractPlatform;
 use Doctrine\DBAL\Types\Type;
-use Symfony\Component\Intl\Intl;
+use Symfony\Component\Intl\Currencies;
 
 /**
  * Handles Currency as doctrine type.
@@ -28,7 +28,7 @@ class CurrencyDoctrineType extends Type
 
     public function convertToPHPValue($value, AbstractPlatform $platform)
     {
-        if (!\array_key_exists($value, Intl::getCurrencyBundle()->getCurrencyNames())) {
+        if (!\array_key_exists($value, Currencies::getNames())) {
             throw new \RuntimeException(sprintf("'%d' is not a supported currency.", $value));
         }
 

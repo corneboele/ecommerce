@@ -16,7 +16,7 @@ namespace Sonata\PriceBundle\DependencyInjection;
 use Symfony\Component\Config\Definition\Builder\ArrayNodeDefinition;
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
 use Symfony\Component\Config\Definition\ConfigurationInterface;
-use Symfony\Component\Intl\Intl;
+use Symfony\Component\Intl\Currencies;
 
 /**
  * This is the class that validates and merges configuration from your app/config files.
@@ -52,7 +52,7 @@ class Configuration implements ConfigurationInterface
                 ->scalarNode('currency')
                     ->isRequired()
                     ->validate()
-                    ->ifNotInArray(array_keys(Intl::getCurrencyBundle()->getCurrencyNames()))
+                    ->ifNotInArray(array_keys(Currencies::getNames()))
                         ->thenInvalid("Invalid currency '%s'")
                     ->end()
                 ->end()
