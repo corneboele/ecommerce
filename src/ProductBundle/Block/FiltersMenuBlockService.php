@@ -35,7 +35,7 @@ class FiltersMenuBlockService extends MenuBlockService
      */
     public function __construct(Environment $templating, MenuProviderInterface $menuProvider, ProductMenuBuilder $menuBuilder)
     {
-        parent::__construct($templating, $menuProvider, []);
+        parent::__construct($templating, null, $menuProvider, []);
 
         $this->menuBuilder = $menuBuilder;
     }
