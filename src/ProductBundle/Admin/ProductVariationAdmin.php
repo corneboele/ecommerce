@@ -20,8 +20,6 @@ use Sonata\AdminBundle\Show\ShowMapper;
 
 class ProductVariationAdmin extends ProductAdmin
 {
-    protected $parentAssociationMapping = 'parent';
-
     /**
      * Overwrite the default behavior to make ProductAdmin (product) > ProductAdmin (variation) works properly.
      *

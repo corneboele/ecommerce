@@ -23,8 +23,6 @@ use Sonata\AdminBundle\Form\Type\ModelListType;
 
 class ProductCollectionAdmin extends AbstractAdmin
 {
-    protected $parentAssociationMapping = 'product';
-
     public function configure(): void
     {
         $this->setTranslationDomain('SonataProductBundle');

@@ -14,6 +14,7 @@
             <argument>%sonata.order.admin.order.controller%</argument>
             <call method="addChild">
                 <argument type="service" id="sonata.order.admin.order_element"/>
+                <argument>order</argument>
             </call>
             <call method="setCurrencyDetector">
                 <argument type="service" id="sonata.price.currency.detector"/>

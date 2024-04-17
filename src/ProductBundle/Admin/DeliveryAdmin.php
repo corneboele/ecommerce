@@ -25,8 +25,6 @@ use Symfony\Component\Form\Extension\Core\Type\CountryType;
 
 class DeliveryAdmin extends AbstractAdmin
 {
-    protected $parentAssociationMapping = 'product';
-
     public function configure(): void
     {
         $this->setTranslationDomain('SonataProductBundle');

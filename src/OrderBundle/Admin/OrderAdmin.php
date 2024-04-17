@@ -67,7 +67,6 @@ class OrderAdmin extends AbstractAdmin
 
     public function configure(): void
     {
-        $this->parentAssociationMapping = 'customer';
         $this->setTranslationDomain('SonataOrderBundle');
     }
 

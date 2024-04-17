@@ -25,18 +25,23 @@
             <argument>%sonata.product.admin.product.controller%</argument>
             <call method="addChild">
                 <argument type="service" id="sonata.product.admin.product.category"/>
+                <argument>product</argument>
             </call>
             <call method="addChild">
                 <argument type="service" id="sonata.product.admin.product.collection"/>
+                <argument>product</argument>
             </call>
             <call method="addChild">
                 <argument type="service" id="sonata.product.admin.delivery"/>
+                <argument>product</argument>
             </call>
             <call method="addChild">
                 <argument type="service" id="sonata.product.admin.product.variation"/>
+                <argument>product</argument>
             </call>
             <call method="setProductPool">
                 <argument type="service" id="sonata.product.pool"/>
+                <argument>product</argument>
             </call>
             <call method="setCurrencyDetector">
                 <argument type="service" id="sonata.price.currency.detector"/>

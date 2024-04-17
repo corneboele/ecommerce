@@ -28,7 +28,6 @@ class AddressAdmin extends AbstractAdmin
 
     public function configure(): void
     {
-        $this->parentAssociationMapping = 'customer';
         $this->setTranslationDomain('SonataCustomerBundle');
     }
 

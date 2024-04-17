@@ -16,9 +16,11 @@
             <argument>%sonata.customer.admin.customer.controller%</argument>
             <call method="addChild">
                 <argument type="service" id="sonata.customer.admin.address"/>
+                <argument>customer</argument>
             </call>
             <call method="addChild">
                 <argument type="service" id="sonata.order.admin.order"/>
+                <argument>customer</argument>
             </call>
         </service>
         <service id="sonata.customer.admin.address" class="%sonata.customer.admin.address.class%">
