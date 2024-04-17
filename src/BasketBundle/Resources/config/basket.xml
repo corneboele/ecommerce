@@ -31,6 +31,12 @@
         <service id="Sonata\BasketBundle\Controller\BasketController">
             <tag name="controller.service_arguments"/>
             <argument type="service" id="sonata.basket.factory"/>
+            <argument type="service" id="sonata.customer.selector"/>
+            <argument type="service" id="sonata.basket"/>
+            <argument type="service" id="sonata.address.manager"/>
+            <argument type="service" id="translator"/>
+            <argument type="service" id="sonata.seo.page"/>
+            <argument type="service" id="sonata.customer.manager"/>
         </service>
     </services>
 </container>

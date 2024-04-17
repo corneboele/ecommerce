@@ -18,8 +18,13 @@ use Sonata\BasketBundle\Form\BasketType;
 use Sonata\BasketBundle\Form\PaymentType;
 use Sonata\BasketBundle\Form\ShippingType;
 use Sonata\Component\Basket\BasketFactoryInterface;
+use Sonata\Component\Basket\BasketInterface;
 use Sonata\Component\Customer\AddressInterface;
+use Sonata\Component\Customer\AddressManagerInterface;
+use Sonata\Component\Customer\CustomerManagerInterface;
+use Sonata\Component\Customer\CustomerSelectorInterface;
 use Sonata\Component\Delivery\UndeliverableCountryException;
+use Sonata\SeoBundle\Seo\SeoPageInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\Extension\Core\Type\FormType;
 use Symfony\Component\Form\Extension\Validator\ViolationMapper\ViolationMapper;
@@ -30,6 +35,7 @@ use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Intl\Intl;
 use Symfony\Component\Routing\Exception\MethodNotAllowedException;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 /**
  * This controller manages the Basket operation and most of the order process.
@@ -40,10 +46,29 @@ class BasketController extends AbstractController
      * @var BasketFactoryInterface
      */
     private $basketFactory;
+    private $customerSelector;
+    private $basket;
+    private $addressManager;
+    private $translator;
+    private $seoPage;
+    private $customerManager;
 
-    public function __construct(BasketFactoryInterface $basketFactory)
-    {
+    public function __construct(
+        BasketFactoryInterface $basketFactory,
+        CustomerSelectorInterface $customerSelector,
+        BasketInterface $basket,
+        AddressManagerInterface $addressManager,
+        TranslatorInterface $translator,
+        SeoPageInterface $seoPage,
+        CustomerManagerInterface $customerManager
+    ) {
         $this->basketFactory = $basketFactory;
+        $this->customerSelector = $customerSelector;
+        $this->basket = $basket;
+        $this->addressManager = $addressManager;
+        $this->translator = $translator;
+        $this->seoPage = $seoPage;
+        $this->customerManager = $customerManager;
     }
 
     /**
@@ -55,7 +80,7 @@ class BasketController extends AbstractController
      */
     public function indexAction($form = null)
     {
-        $form = $form ?: $this->createForm(BasketType::class, $this->get('sonata.basket'), [
+        $form = $form ?: $this->createForm(BasketType::class, $this->basket, [
             'validation_groups' => ['elements'],
         ]);
 
@@ -71,10 +96,10 @@ class BasketController extends AbstractController
 
         $this->get('session')->set('sonata_basket_delivery_redirect', 'sonata_basket_delivery_address');
 
-        $this->get('sonata.seo.page')->setTitle($this->get('translator')->trans('basket_index_title', [], 'SonataBasketBundle'));
+        $this->seoPage->setTitle($this->translator->trans('basket_index_title', [], 'SonataBasketBundle'));
 
         return $this->render('@SonataBasket/Basket/index.html.twig', [
-            'basket' => $this->get('sonata.basket'),
+            'basket' => $this->basket,
             'form' => $form->createView(),
         ]);
     }
@@ -86,7 +111,7 @@ class BasketController extends AbstractController
      */
     public function updateAction(Request $request)
     {
-        $form = $this->createForm(BasketType::class, $this->get('sonata.basket'), ['validation_groups' => ['elements']]);
+        $form = $this->createForm(BasketType::class, $this->basket, ['validation_groups' => ['elements']]);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
@@ -144,11 +169,11 @@ class BasketController extends AbstractController
 
         // if the form is valid add the product to the basket
         if ($form->isSubmitted() && $form->isValid()) {
-            $basket = $this->get('sonata.basket');
+            $basket = $this->basket;
             $basketElement = $form->getData();
 
             $quantity = $basketElement->getQuantity();
-            $currency = $this->get('sonata.basket')->getCurrency();
+            $currency = $this->basket->getCurrency();
             $price = $provider->calculatePrice($product, $currency, true, $quantity);
 
             if ($basket->hasProduct($product)) {
@@ -188,7 +213,7 @@ class BasketController extends AbstractController
      */
     public function resetAction()
     {
-        $this->basketFactory->reset($this->get('sonata.basket'));
+        $this->basketFactory->reset($this->basket);
 
         return new RedirectResponse($this->generateUrl('sonata_basket_index'));
     }
@@ -201,7 +226,7 @@ class BasketController extends AbstractController
     public function headerPreviewAction()
     {
         return $this->render('@SonataBasket/Basket/header_preview.html.twig', [
-            'basket' => $this->get('sonata.basket'),
+            'basket' => $this->basket,
         ]);
     }
 
@@ -213,9 +238,9 @@ class BasketController extends AbstractController
      */
     public function authenticationStepAction()
     {
-        $customer = $this->get('sonata.customer.selector')->get();
+        $customer = $this->customerSelector->get();
 
-        $basket = $this->get('sonata.basket');
+        $basket = $this->basket;
         $basket->setCustomer($customer);
 
         $this->basketFactory->save($basket);
@@ -232,7 +257,7 @@ class BasketController extends AbstractController
      */
     public function paymentStepAction(Request $request)
     {
-        $basket = $this->get('sonata.basket');
+        $basket = $this->basket;
 
         if (0 === $basket->countBasketElements()) {
             return new RedirectResponse($this->generateUrl('sonata_basket_index'));
@@ -264,7 +289,7 @@ class BasketController extends AbstractController
             return new RedirectResponse($this->generateUrl('sonata_basket_final'));
         }
 
-        $this->get('sonata.seo.page')->setTitle($this->get('translator')->trans('basket_payment_title', [], 'SonataBasketBundle'));
+        $this->seoPage->setTitle($this->translator->trans('basket_payment_title', [], 'SonataBasketBundle'));
 
         return $this->render('@SonataBasket/Basket/payment_step.html.twig', [
             'basket' => $basket,
@@ -282,7 +307,7 @@ class BasketController extends AbstractController
      */
     public function deliveryStepAction(Request $request)
     {
-        $basket = $this->get('sonata.basket');
+        $basket = $this->basket;
 
         if (0 === $basket->countBasketElements()) {
             return new RedirectResponse($this->generateUrl('sonata_basket_index'));
@@ -300,7 +325,7 @@ class BasketController extends AbstractController
             ]);
         } catch (UndeliverableCountryException $ex) {
             $countryName = Intl::getRegionBundle()->getCountryName($ex->getAddress()->getCountryCode());
-            $message = $this->get('translator')->trans('undeliverable_country', ['%country%' => $countryName], 'SonataBasketBundle');
+            $message = $this->translator->trans('undeliverable_country', ['%country%' => $countryName], 'SonataBasketBundle');
             $this->get('session')->getFlashBag()->add('error', $message);
 
             return new RedirectResponse($this->generateUrl('sonata_basket_index'));
@@ -317,7 +342,7 @@ class BasketController extends AbstractController
             return new RedirectResponse($this->generateUrl('sonata_basket_payment_address'));
         }
 
-        $this->get('sonata.seo.page')->setTitle($this->get('translator')->trans('basket_delivery_title', [], 'SonataBasketBundle'));
+        $this->seoPage->setTitle($this->translator->trans('basket_delivery_title', [], 'SonataBasketBundle'));
 
         return $this->render($template, [
             'basket' => $basket,
@@ -335,13 +360,13 @@ class BasketController extends AbstractController
      */
     public function deliveryAddressStepAction(Request $request)
     {
-        $customer = $this->get('sonata.customer.selector')->get();
+        $customer = $this->customerSelector->get();
 
         if (!$customer) {
             throw new NotFoundHttpException('customer not found');
         }
 
-        $basket = $this->get('sonata.basket');
+        $basket = $this->basket;
         $basket->setCustomer($customer);
 
         if (0 === $basket->countBasketElements()) {
@@ -350,7 +375,7 @@ class BasketController extends AbstractController
 
         $addresses = $customer->getAddressesByType(AddressInterface::TYPE_DELIVERY);
 
-        $em = $this->container->get('sonata.address.manager')->getEntityManager();
+        $em = $this->addressManager->getEntityManager();
         foreach ($addresses as $key => $address) {
             // Prevents usage of not persisted addresses in AddressType to avoid choice field error
             // This case occurs when customer is taken from a session
@@ -374,9 +399,9 @@ class BasketController extends AbstractController
 
                 $customer->addAddress($address);
 
-                $this->get('sonata.customer.manager')->save($customer);
+                $this->customerManager->save($customer);
 
-                $message = $this->get('translator')->trans('address_add_success', [], 'SonataCustomerBundle');
+                $message = $this->translator->trans('address_add_success', [], 'SonataCustomerBundle');
                 $this->get('session')->getFlashBag()->add('sonata_customer_success', $message);
             }
 
@@ -391,7 +416,7 @@ class BasketController extends AbstractController
         // Set URL to be redirected to once edited address
         $this->get('session')->set('sonata_address_redirect', $this->generateUrl('sonata_basket_delivery_address'));
 
-        $this->get('sonata.seo.page')->setTitle($this->get('translator')->trans('basket_delivery_title', [], 'SonataBasketBundle'));
+        $this->seoPage->setTitle($this->translator->trans('basket_delivery_title', [], 'SonataBasketBundle'));
 
         return $this->render($template, [
             'form' => $form->createView(),
@@ -409,7 +434,7 @@ class BasketController extends AbstractController
      */
     public function paymentAddressStepAction(Request $request)
     {
-        $basket = $this->get('sonata.basket');
+        $basket = $this->basket;
 
         if (0 === $basket->countBasketElements()) {
             return new RedirectResponse($this->generateUrl('sonata_basket_index'));
@@ -438,9 +463,9 @@ class BasketController extends AbstractController
 
                 $customer->addAddress($address);
 
-                $this->get('sonata.customer.manager')->save($customer);
+                $this->customerManager->save($customer);
 
-                $message = $this->get('translator')->trans('address_add_success', [], 'SonataCustomerBundle');
+                $message = $this->translator->trans('address_add_success', [], 'SonataCustomerBundle');
                 $this->get('session')->getFlashBag()->add('sonata_customer_success', $message);
             }
 
@@ -455,7 +480,7 @@ class BasketController extends AbstractController
         // Set URL to be redirected to once edited address
         $this->get('session')->set('sonata_address_redirect', $this->generateUrl('sonata_basket_payment_address'));
 
-        $this->get('sonata.seo.page')->setTitle($this->get('translator')->trans('basket_payment_title', [], 'SonataBasketBundle'));
+        $this->seoPage->setTitle($this->translator->trans('basket_payment_title', [], 'SonataBasketBundle'));
 
         return $this->render($template, [
             'form' => $form->createView(),
@@ -470,7 +495,7 @@ class BasketController extends AbstractController
      */
     public function finalReviewStepAction(Request $request)
     {
-        $basket = $this->get('sonata.basket');
+        $basket = $this->basket;
 
         $violations = $this
             ->get('validator')
@@ -494,7 +519,7 @@ class BasketController extends AbstractController
             }
         }
 
-        $this->get('sonata.seo.page')->setTitle($this->get('translator')->trans('basket_review_title', [], 'SonataBasketBundle'));
+        $this->seoPage->setTitle($this->translator->trans('basket_review_title', [], 'SonataBasketBundle'));
 
         return $this->render('@SonataBasket/Basket/final_review_step.html.twig', [
             'basket' => $basket,
